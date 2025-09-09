@@ -9,16 +9,17 @@ Ferramenta completa de varredura de portas desenvolvida em Python com três inte
 python install_complete.py
 ```
 
-### 2. Executar Interface Web (Recomendada)
+### 3. Windows - Clique Duplo
+- `setup_and_start_web.bat` - Interface Web
+- `setup_and_start_gui.bat` - Interface GUI
+
+🌐 **Acesse: http://localhost:8000**
+
+### . Executar Interface Web por IDE
 ```bash
 cd web_frontend
 python manage.py runserver
 ```
-🌐 **Acesse: http://localhost:8000**
-
-### 3. Windows - Clique Duplo
-- `setup_and_start_web.bat` - Interface Web
-- `setup_and_start_gui.bat` - Interface GUI
 
 ## ✨ Características Principais
 
