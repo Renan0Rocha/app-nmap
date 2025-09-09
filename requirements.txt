@@ -1,0 +1,64 @@
+# Requisitos para a Ferramenta de Varredura de Portas
+
+## Requisitos Obrigatórios (Built-in Python)
+# Estes módulos fazem parte da biblioteca padrão do Python 3.6+
+# e não requerem instalação adicional
+
+# socket - Comunicação de rede
+# threading - Execução paralela
+# time - Funções de tempo
+# argparse - Parsing de argumentos CLI
+# ipaddress - Manipulação de endereços IP
+# concurrent.futures - Pool de threads
+# dataclasses - Classes de dados
+# struct - Empacotamento de dados binários
+# sys - Funções do sistema
+# os - Interface do sistema operacional
+# tempfile - Arquivos temporários
+# unittest - Framework de testes
+
+## Requisitos Opcionais
+# Instale com: pip install <nome_do_pacote>
+
+# Para interface gráfica (GUI)
+tkinter>=8.6  # Geralmente já incluído no Python
+
+# Para funcionalidades avançadas de rede
+scapy>=2.4.5
+
+# Para informações detalhadas do sistema
+psutil>=5.8.0
+
+# Para saída colorida no terminal
+colorama>=0.4.4
+
+# Para criação de atalhos no Windows
+pywin32>=301  # Windows apenas
+
+# Para parsing de configurações avançadas
+pyyaml>=5.4.1
+
+# Para logging avançado
+loguru>=0.6.0
+
+# Para geração de gráficos e relatórios
+matplotlib>=3.5.0
+pandas>=1.3.0
+
+# Para exportação em múltiplos formatos
+openpyxl>=3.0.9  # Excel
+xmltodict>=0.12.0  # XML
+
+# Para detecção de serviços
+python-nmap>=0.6.1
+
+## Instalação Automática
+# Execute o seguinte comando para instalar dependências opcionais:
+# pip install -r requirements.txt
+
+## Observações
+# 1. A ferramenta funciona apenas com Python padrão
+# 2. Dependências opcionais adicionam funcionalidades extras
+# 3. Para Ubuntu/Debian: sudo apt-get install python3-tk
+# 4. Para CentOS/RHEL: sudo yum install tkinter
+# 5. Para macOS: tkinter já vem com Python do Homebrew

@@ -1,0 +1,3 @@
+"""
+Scanner Django App
+"""

@@ -1,0 +1,425 @@
+{% extends 'scanner/base.html' %}
+{% load static %}
+
+{% block title %}Resultados da Varredura{% endblock %}
+
+{% block extra_css %}
+<style>
+    .result-summary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 1rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .host-card {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.75rem;
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        transition: box-shadow 0.2s;
+    }
+    
+    .host-card:hover {
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .host-header {
+        background: #f8fafc;
+        padding: 1.5rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .port-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1rem;
+        padding: 1.5rem;
+    }
+    
+    .port-item {
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        transition: all 0.2s;
+    }
+    
+    .port-item:hover {
+        background: #f3f4f6;
+        border-color: #d1d5db;
+    }
+    
+    .port-item.open {
+        border-left: 4px solid #059669;
+        background: #ecfdf5;
+    }
+    
+    .port-item.closed {
+        border-left: 4px solid #dc2626;
+        background: #fef2f2;
+    }
+    
+    .port-item.filtered {
+        border-left: 4px solid #d97706;
+        background: #fffbeb;
+    }
+    
+    .export-buttons {
+        position: sticky;
+        top: 20px;
+        z-index: 10;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Summary Card -->
+    <div class="result-summary">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h2 class="mb-3">
+                    <i class="fas fa-chart-line me-3"></i>
+                    Resultados da Varredura
+                </h2>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-bullseye fa-lg me-2"></i>
+                            <div>
+                                <div class="fw-bold">Target</div>
+                                <div class="opacity-75">{{ scan_job.target }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-server fa-lg me-2"></i>
+                            <div>
+                                <div class="fw-bold">{{ results|length }}</div>
+                                <div class="opacity-75">Host{{ results|length|pluralize:"s" }} Encontrado{{ results|length|pluralize:"s" }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-door-open fa-lg me-2"></i>
+                            <div>
+                                <div class="fw-bold">{{ total_open_ports }}</div>
+                                <div class="opacity-75">Porta{{ total_open_ports|pluralize:"s" }} Aberta{{ total_open_ports|pluralize:"s" }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-clock fa-lg me-2"></i>
+                            <div>
+                                <div class="fw-bold">{{ scan_duration }}s</div>
+                                <div class="opacity-75">Duração</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 text-end">
+                <div class="export-buttons">
+                    <button class="btn btn-light me-2" onclick="exportResults('json')">
+                        <i class="fas fa-download me-2"></i>
+                        Export JSON
+                    </button>
+                    <button class="btn btn-light me-2" onclick="exportResults('csv')">
+                        <i class="fas fa-file-csv me-2"></i>
+                        Export CSV
+                    </button>
+                    <button class="btn btn-light" onclick="window.print()">
+                        <i class="fas fa-print me-2"></i>
+                        Imprimir
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results -->
+    {% if results %}
+        {% for host_ip, host_data in results.items %}
+        <div class="host-card" id="host-{{ forloop.counter }}">
+            <div class="host-header">
+                <div class="row align-items-center">
+                    <div class="col-lg-8">
+                        <h4 class="mb-1">
+                            <i class="fas fa-server me-2 text-primary"></i>
+                            {{ host_ip }}
+                        </h4>
+                        {% if host_data.hostname and host_data.hostname != host_ip %}
+                        <p class="mb-0 text-muted">
+                            <i class="fas fa-globe me-1"></i>
+                            {{ host_data.hostname }}
+                        </p>
+                        {% endif %}
+                    </div>
+                    <div class="col-lg-4 text-end">
+                        <div class="d-flex align-items-center justify-content-end">
+                            <span class="badge bg-success me-2">
+                                {{ host_data.open_ports|length }} porta{{ host_data.open_ports|length|pluralize:"s" }} aberta{{ host_data.open_ports|length|pluralize:"s" }}
+                            </span>
+                            <button class="btn btn-sm btn-outline-primary" 
+                                    onclick="copyHostData('{{ host_ip }}')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if host_data.ports %}
+            <div class="port-grid">
+                {% for port in host_data.ports %}
+                <div class="port-item {{ port.status|lower }}" data-port="{{ port.port }}" data-protocol="{{ port.protocol }}">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <div class="fw-bold fs-5">{{ port.port }}/{{ port.protocol|upper }}</div>
+                            <div class="port-status {{ port.status|lower }}">{{ port.status|upper }}</div>
+                        </div>
+                        <div class="text-end">
+                            {% if port.service %}
+                            <small class="text-muted d-block">{{ port.service }}</small>
+                            {% endif %}
+                            {% if port.version %}
+                            <small class="text-muted d-block">{{ port.version }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if port.banner %}
+                    <div class="mt-2">
+                        <small class="text-muted d-block mb-1">Banner:</small>
+                        <code class="d-block p-2 bg-light rounded">{{ port.banner|truncatechars:100 }}</code>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="p-4 text-center text-muted">
+                <i class="fas fa-times-circle fa-2x mb-2"></i>
+                <p>Nenhuma porta encontrada neste host</p>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    {% else %}
+    <!-- No Results -->
+    <div class="text-center py-5">
+        <i class="fas fa-search fa-5x text-muted mb-4"></i>
+        <h3 class="text-muted mb-3">Nenhum resultado encontrado</h3>
+        <p class="text-muted mb-4">
+            A varredura não encontrou hosts ativos ou portas abertas no target especificado.
+        </p>
+        <a href="{% url 'scanner_web:index' %}" class="btn btn-primary">
+            <i class="fas fa-arrow-left me-2"></i>
+            Voltar ao Dashboard
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- Back to Dashboard -->
+    <div class="text-center mt-5">
+        <a href="{% url 'scanner_web:index' %}" class="btn btn-outline-primary btn-lg">
+            <i class="fas fa-arrow-left me-2"></i>
+            Voltar ao Dashboard
+        </a>
+    </div>
+</div>
+
+<!-- Export Modal -->
+<div class="modal fade" id="exportModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-download me-2"></i>
+                    Exportar Resultados
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>O download dos resultados será iniciado em breve...</p>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+/**
+ * Exporta resultados em formato especificado
+ */
+function exportResults(format) {
+    const scanId = '{{ scan_job.id }}';
+    const url = `/api/scans/${scanId}/export/?format=${format}`;
+    
+    // Mostra modal de loading
+    const modal = new bootstrap.Modal(document.getElementById('exportModal'));
+    modal.show();
+    
+    // Inicia download
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `scan_results_${scanId}.${format}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Esconde modal após breve delay
+    setTimeout(() => {
+        modal.hide();
+    }, 2000);
+}
+
+/**
+ * Copia dados do host para clipboard
+ */
+async function copyHostData(hostIp) {
+    const hostData = {
+        host: hostIp,
+        ports: []
+    };
+    
+    // Coleta dados das portas do host
+    const hostCard = Array.from(document.querySelectorAll('.host-card')).find(card => 
+        card.querySelector('h4').textContent.includes(hostIp)
+    );
+    
+    if (hostCard) {
+        const portItems = hostCard.querySelectorAll('.port-item');
+        portItems.forEach(item => {
+            const port = item.dataset.port;
+            const protocol = item.dataset.protocol;
+            const status = item.querySelector('.port-status').textContent.toLowerCase();
+            
+            hostData.ports.push({
+                port: parseInt(port),
+                protocol: protocol,
+                status: status
+            });
+        });
+    }
+    
+    const text = `Host: ${hostIp}\nPortas Abertas: ${hostData.ports.filter(p => p.status === 'open').map(p => `${p.port}/${p.protocol}`).join(', ')}`;
+    
+    try {
+        await navigator.clipboard.writeText(text);
+        showAlert('Dados do host copiados para a área de transferência!', 'success');
+    } catch (err) {
+        showAlert('Erro ao copiar dados para a área de transferência.', 'danger');
+    }
+}
+
+/**
+ * Mostra alerta
+ */
+function showAlert(message, type) {
+    const alertHtml = `
+        <div class="alert alert-${type} alert-dismissible fade show position-fixed" 
+             style="top: 20px; right: 20px; z-index: 9999;" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', alertHtml);
+    
+    // Auto-remove após 3 segundos
+    setTimeout(() => {
+        const alert = document.querySelector('.alert-dismissible');
+        if (alert) alert.remove();
+    }, 3000);
+}
+
+// Adiciona funcionalidade de filtro/busca
+document.addEventListener('DOMContentLoaded', function() {
+    // Adiciona campo de busca se houver resultados
+    {% if results %}
+    const summary = document.querySelector('.result-summary');
+    const searchHtml = `
+        <div class="mt-3">
+            <div class="row">
+                <div class="col-md-6">
+                    <input type="text" class="form-control" id="searchInput" 
+                           placeholder="Buscar por IP, porta ou serviço...">
+                </div>
+                <div class="col-md-6">
+                    <select class="form-select" id="statusFilter">
+                        <option value="">Todos os status</option>
+                        <option value="open">Apenas abertas</option>
+                        <option value="closed">Apenas fechadas</option>
+                        <option value="filtered">Apenas filtradas</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    `;
+    summary.insertAdjacentHTML('beforeend', searchHtml);
+    
+    // Event listeners para filtros
+    document.getElementById('searchInput').addEventListener('input', filterResults);
+    document.getElementById('statusFilter').addEventListener('change', filterResults);
+    {% endif %}
+});
+
+/**
+ * Filtra resultados baseado na busca e filtros
+ */
+function filterResults() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const statusFilter = document.getElementById('statusFilter').value;
+    
+    document.querySelectorAll('.host-card').forEach(hostCard => {
+        let hostVisible = false;
+        const hostIp = hostCard.querySelector('h4').textContent.toLowerCase();
+        
+        // Verifica se o IP do host contém o termo de busca
+        const hostMatches = hostIp.includes(searchTerm);
+        
+        // Verifica portas
+        const portItems = hostCard.querySelectorAll('.port-item');
+        let visiblePorts = 0;
+        
+        portItems.forEach(portItem => {
+            const portText = portItem.textContent.toLowerCase();
+            const portStatus = portItem.classList.contains('open') ? 'open' : 
+                             portItem.classList.contains('closed') ? 'closed' : 'filtered';
+            
+            const matchesSearch = portText.includes(searchTerm) || hostMatches;
+            const matchesStatus = !statusFilter || portStatus === statusFilter;
+            
+            if (matchesSearch && matchesStatus) {
+                portItem.style.display = '';
+                visiblePorts++;
+                hostVisible = true;
+            } else {
+                portItem.style.display = 'none';
+            }
+        });
+        
+        // Mostra/esconde host baseado na visibilidade das portas
+        hostCard.style.display = hostVisible ? '' : 'none';
+        
+        // Atualiza contador de portas visíveis
+        const portsBadge = hostCard.querySelector('.badge');
+        if (portsBadge && visiblePorts !== portItems.length) {
+            portsBadge.textContent = `${visiblePorts} de ${portItems.length} porta${portItems.length !== 1 ? 's' : ''}`;
+        }
+    });
+}
+</script>
+{% endblock %}
