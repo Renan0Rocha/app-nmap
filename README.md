@@ -9,7 +9,7 @@ Ferramenta completa de varredura de portas desenvolvida em Python com três inte
 python install_complete.py
 ```
 
-### 3. Windows - Clique Duplo
+### 2. Windows - Clique Duplo
 - `setup_and_start_web.bat` - Interface Web
 - `setup_and_start_gui.bat` - Interface GUI
 
