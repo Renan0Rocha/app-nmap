@@ -2,6 +2,12 @@
 
 Ferramenta completa de varredura de portas desenvolvida em Python com três interfaces distintas: Web, GUI e CLI.
 
+## Requisitos
+
+- Python 3.6+
+- Bibliotecas padrão do Python (socket, threading, argparse, etc.)
+- Permissões de administrador podem ser necessárias para algumas funcionalidades UDP
+
 ## 🚀 Instalação e Execução Rápida
 
 ### 1. Instalação Automática
@@ -27,7 +33,6 @@ python manage.py runserver
 - ✅ **Múltiplos alvos** - IP único, múltiplos IPs, CIDR, hostnames  
 - ✅ **3 Interfaces** - Web moderna, GUI desktop, CLI para automação
 - ✅ **Multi-threading** - Performance otimizada
-- ✅ **Exportação** - JSON, TXT, CSV
 - ✅ **Cross-platform** - Windows, Linux, macOS
 
 ## � Interfaces Disponíveis
@@ -49,12 +54,6 @@ python manage.py runserver
 - ✅ **Configuração flexível** de portas e timeouts
 - ✅ **Interface web moderna** com tempo real
 - ✅ **API REST** para automação e integração
-
-## Requisitos
-
-- Python 3.6+
-- Bibliotecas padrão do Python (socket, threading, argparse, etc.)
-- Permissões de administrador podem ser necessárias para algumas funcionalidades UDP
 
 ## Instalação
 
